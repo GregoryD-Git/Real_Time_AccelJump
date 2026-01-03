@@ -1,0 +1,145 @@
+Here’s a clean, well‑structured write‑up you can drop directly into your GitHub repo. It explains the issue, the root cause, the fix, and why the environment should live inside your project folder on the G: drive. I’ve written it like a project README section so it’s easy for others (or future‑you) to follow.
+
+---
+
+# 📝 **Dash App Environment Setup — Summary & Fix**
+
+This document explains the issue encountered when running a Dash app inside Spyder’s default environment, why it happens, and how to fix it by creating a dedicated virtual environment inside the project directory.
+
+---
+
+## 🚨 **Problem Summary**
+
+When attempting to run a Dash application from the command line, Python crashed with a fatal Windows exception:
+
+```
+Windows fatal exception: code 0xc06d007f
+```
+
+The traceback pointed to:
+
+```
+import numpy as np
+```
+
+even though NumPy was installed.
+
+This crash occurred **before the Dash server started**, and no URL was printed.
+
+---
+
+## 🔍 **Root Cause**
+
+The issue was caused by running the Dash app inside **Spyder’s internal environment**:
+
+```
+C:\Users\<user>\AppData\Local\spyder-6\envs\spyder-runtime\
+```
+
+This environment is **not a full scientific Python environment**. It is designed only to run Spyder itself, and it includes:
+
+- a minimal, restricted Python interpreter  
+- incomplete or incompatible builds of scientific libraries (NumPy, SciPy, etc.)  
+- DLL conflicts when NumPy tries to initialize BLAS/FPE routines  
+- behavior that mimics Jupyter, which also interferes with Dash  
+
+As a result, importing NumPy caused a low‑level DLL crash long before the Dash server could start.
+
+---
+
+## ✅ **Solution: Create a Dedicated Virtual Environment**
+
+The fix is to create a **standalone virtual environment** for the Dash project and install all required packages there.
+
+### **Steps**
+
+From the project directory:
+
+```
+G:\My Drive\Python\MyGitRepo\Real_Time_AccelJump
+```
+
+run:
+
+```
+python -m venv dash_env
+dash_env\Scripts\activate
+pip install dash plotly numpy pandas
+```
+
+Then run the app:
+
+```
+python RT_jump_app.py
+```
+
+This environment is isolated, stable, and free from Spyder’s internal restrictions.
+
+---
+
+## 📁 **Why Create the Environment Inside the Project Folder (G: Drive)?**
+
+Placing the virtual environment **inside the project directory** has several advantages:
+
+### ✔ **Self‑contained project**
+All code, dependencies, and environment files live together.  
+Anyone cloning the repo can recreate the environment easily.
+
+### ✔ **Reproducibility**
+You avoid dependency conflicts with:
+
+- Spyder’s internal environment  
+- System‑wide Python installations  
+- Other projects  
+
+Each project gets its own clean environment.
+
+### ✔ **Portability**
+You can move or copy the entire project folder (including the environment) to another machine or drive without breaking paths.
+
+### ✔ **Clear separation**
+Spyder’s runtime environment stays untouched.  
+Your Dash app runs in a proper, full‑featured Python environment.
+
+### ✔ **Better for GitHub documentation**
+You can instruct others to:
+
+```
+cd project_folder
+python -m venv dash_env
+dash_env\Scripts\activate
+pip install -r requirements.txt
+```
+
+and they’ll get the exact same setup.
+
+---
+
+## 📦 **Recommended Project Structure**
+
+```
+Real_Time_AccelJump/
+│
+├── dash_env/                ← virtual environment (not committed to Git)
+├── RT_jump_app.py           ← main Dash app
+├── test_dash_app.py         ← minimal test app
+├── requirements.txt         ← pip freeze output
+└── README.md                ← setup instructions
+```
+
+> **Note:** Add `dash_env/` to `.gitignore` so the environment is not committed.
+
+---
+
+## 🎉 **Outcome**
+
+After creating the dedicated environment:
+
+- NumPy imports correctly  
+- Dash apps run without crashing  
+- The expected URL appears in the terminal  
+- The development workflow is stable and reproducible  
+
+---
+
+If you want, I can also generate a `requirements.txt`, a `.gitignore`, or a full README template for your repo.

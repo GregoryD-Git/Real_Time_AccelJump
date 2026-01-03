@@ -14,10 +14,9 @@ import numpy as np
 from collections import deque
 from scipy.signal import butter, filtfilt
 
-# # Dash gets confused when running in spyder and needs to change its behavior 
-# # to run like a normal web server. This code should fix that using os
-# import os
-# os.environ["DASH_NO_JUPYTER"] = "1"
+# error handling
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 # ------------------------------------------------------------
 # CONFIGURATION
@@ -130,7 +129,7 @@ html.Div(id="jump-history-table")
 def update(n):
     # ------------------ STREAM DATA ------------------
     try:
-        r = requests.get(PHY_URL, timeout=0.1).json()
+        r = requests.get(PHY_URL, timeout=2).json()
         ax = r["buffer"]["accX"]["buffer"][-1]
     except:
         ax = 0

@@ -1,0 +1,4 @@
+G:
+cd "My Drive\Python\MyGitRepo\Real_Time_AccelJump"
+dash_env\Scripts\activate
+python RT_jump_app.py
