@@ -18,10 +18,14 @@ from scipy.signal import butter, filtfilt
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
+# URL for data -----------------------------------------------
+# this one works, but with empty JSON??
+# http://192.168.12.193/get?experiment
+
 # ------------------------------------------------------------
 # CONFIGURATION
 # ------------------------------------------------------------
-PHY_URL = "http://192.168.12.193/get?experiment=acceleration" # replace with your phone's IP
+PHY_URL = "http://192.168.12.193/get?buffer=accX" # replace with your phone's IP
 BUFFER_SIZE = 500
 SAMPLE_RATE = 50 # Hz
 FILTER_CUTOFF = 10 # Hz for Butterworth filter
@@ -130,9 +134,18 @@ def update(n):
     # ------------------ STREAM DATA ------------------
     try:
         r = requests.get(PHY_URL, timeout=2).json()
-        ax = r["buffer"]["accX"]["buffer"][-1]
-    except:
+        buf = r.get("buffer", {}).get("accX", {}).get("buffer", [])
+        ax = buf[-1] if buf else 0
+    except Exception as e:
+        print("Callback error:", e)
         ax = 0
+    # try:
+    #     resp = requests.get(PHY_URL, timeout=2)
+    #     data = resp.json()
+    #     ax = data["buffer"]["accX"]["buffer"][-1]
+    # except Exception as e:
+    #     print("Callback error:", e)
+    #     ax = 0
     
     timestamp = time.time()
     
