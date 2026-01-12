@@ -9,11 +9,21 @@ from dash import dcc, html
 from dash.dependencies import Input, Output
 import plotly.graph_objs as go
 import numpy as np
+import time
+from collections import deque
+from datetime import datetime 
 
 app = dash.Dash(__name__)
 
 # Number of points to keep in the rolling window
 WINDOW = 500
+BUFFER_SIZE = 500
+start_time = time.time()
+
+# ------------------------------------------------------------
+# DATA BUFFERS
+# ------------------------------------------------------------
+time_buffer = deque(maxlen=BUFFER_SIZE)
 
 # Track x-axis index manually
 x_pos = 0
@@ -57,25 +67,23 @@ y = []
 )
 def update_graph(n):
     global x_pos
-    
-    # # generate random data each interval
-    # y.append(np.random.randn())
-
-    # fig = go.Figure(
-    #     data=[go.Scatter(y=y, mode="lines+markers")]
-    # )
-    # return fig
 
     # Replace this with your accelerometer API call\
     # new_y = *try stuff for API
     new_y = np.random.randn()
-
+    
+    # timestamp = datetime.fromtimestamp(time.time()).second
+    elapsed_time = time.time() - start_time
+    timestamp = round(elapsed_time, 3)  # trim to milliseconds
+    print(f'Timestamp is: {timestamp}')
+    # time_buffer.append(timestamp)
+    
     update = dict(
-        x=[[x_pos]],
+        x=[[timestamp]], # formerly x_pos
         y=[[new_y]]
     )
 
-    x_pos += 1
+    # x_pos += 1
 
     # extendData return format:
     # (update_dict, trace_indices, max_points)
